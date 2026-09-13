@@ -1,0 +1,6 @@
+Extract the slots for the given recipe from the inbox item. Fill only what the item states or clearly implies. Leave every other slot as an empty string. Never invent names, files, or dates.
+For email_with_attachment: recipientName, subject, a short polite body, attachmentQuery as the words that identify the file.
+For message: recipientName and body as the text to send.
+For calendar_event: eventTitle, start and end in ISO 8601; if no end is given use one hour after start.
+For contact_lookup: recipientName and contactField.
+For file_lookup: attachmentQuery.

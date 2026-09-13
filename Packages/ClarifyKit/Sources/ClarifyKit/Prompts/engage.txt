@@ -1,0 +1,1 @@
+Parse the user's request for what to work on into a context from the vocabulary, minutes available, and energy level. Leave context empty for any place, minutes 0 for no limit, energy empty for any level.

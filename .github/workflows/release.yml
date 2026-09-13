@@ -1,0 +1,51 @@
+name: release
+
+# Builds an unsigned DMG on a macOS 26 runner and attaches it to the GitHub
+# release for the pushed tag. No signing or notarization secrets are required;
+# first launch needs a right-click and Open because the build is ad hoc signed.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  dmg:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select the newest Xcode 26
+        run: |
+          XCODE=$(ls -d /Applications/Xcode_26*.app | sort -V | tail -1)
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate the project
+        run: xcodegen generate
+
+      - name: Build (ad hoc signed)
+        run: |
+          xcodebuild -project Clarify.xcodeproj -scheme Clarify -configuration Release \
+            -derivedDataPath build/DerivedData \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= \
+            ENABLE_HARDENED_RUNTIME=NO OTHER_CODE_SIGN_FLAGS= \
+            build
+
+      - name: Package the DMG
+        run: |
+          mkdir -p build/dmg
+          ditto build/DerivedData/Build/Products/Release/Clarify.app build/dmg/Clarify.app
+          ln -s /Applications build/dmg/Applications
+          hdiutil create -volname Clarify -srcfolder build/dmg -ov -format UDZO "build/Clarify-${GITHUB_REF_NAME}.dmg"
+          ls -la build/*.dmg
+
+      - name: Attach to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/Clarify-*.dmg
+          generate_release_notes: true

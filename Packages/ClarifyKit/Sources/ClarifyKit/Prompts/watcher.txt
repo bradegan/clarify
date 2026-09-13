@@ -1,0 +1,1 @@
+The user is waiting on a person for a specific thing. You are shown one email from that person. Decide whether the email resolves what the user was waiting for. Quote the sentence that shows it. If the email is unrelated or only acknowledges, closes is false.
